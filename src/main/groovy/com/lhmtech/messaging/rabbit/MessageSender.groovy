@@ -1,46 +1,13 @@
 package com.lhmtech.messaging.rabbit
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate
-import org.springframework.context.SmartLifecycle
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
 
 /**
- * Created by lihe on 16-11-30.
+ * Created by lihe on 16-12-1.
  */
-class MessageSender implements SmartLifecycle{
-    String exchange
-    RabbitTemplate rabbitTemplate
-
-    void send(String message) {
-
-    }
-
-    @Override
-    boolean isAutoStartup() {
-        return false
-    }
-
-    @Override
-    void stop(Runnable callback) {
-
-    }
-
-    @Override
-    void start() {
-
-    }
-
-    @Override
-    void stop() {
-
-    }
-
-    @Override
-    boolean isRunning() {
-        return false
-    }
-
-    @Override
-    int getPhase() {
-        return 0
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@interface MessageSender {
+    String to
 }
+
