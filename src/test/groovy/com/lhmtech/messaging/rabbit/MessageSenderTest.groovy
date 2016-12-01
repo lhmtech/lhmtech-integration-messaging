@@ -7,13 +7,13 @@ import spock.lang.Specification
  */
 class MessageSenderTest extends Specification {
 
-    def "send message"() {
-        given:
-
-        when:
-        // TODO implement when
-        then:
-        // TODO implement then
-    }
+//    def "send message"() {
+//        given:
+//
+//        when:
+//        // TODO implement when
+//        then:
+//        // TODO implement then
+//    }
 
 }
