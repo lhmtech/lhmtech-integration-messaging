@@ -1,4 +1,4 @@
-package com.lhmtech.messaging.rabbit
+package com.lhmtech.integration.messaging.rabbit
 
 /**
  * Created by lihe on 16-12-2.

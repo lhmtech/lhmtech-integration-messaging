@@ -1,4 +1,4 @@
-package com.lhmtech.messaging.rabbit
+package com.lhmtech.integration.messaging.rabbit
 
 import com.rabbitmq.client.Channel
 import org.slf4j.Logger

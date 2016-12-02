@@ -1,4 +1,4 @@
-package com.lhmtech.messaging.rabbit
+package com.lhmtech.integration.messaging.rabbit
 
 import com.rabbitmq.client.ConnectionFactory
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory

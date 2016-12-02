@@ -1,4 +1,4 @@
-package com.lhmtech.messaging.rabbit
+package com.lhmtech.integration.messaging.rabbit
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
