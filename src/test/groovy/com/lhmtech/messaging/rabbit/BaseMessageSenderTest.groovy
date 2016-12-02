@@ -1,7 +1,11 @@
 package com.lhmtech.messaging.rabbit
 
+import com.rabbitmq.client.AMQP
+import com.rabbitmq.client.Channel
 import org.slf4j.Logger
 import org.springframework.amqp.core.Message
+import org.springframework.amqp.rabbit.connection.Connection
+import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import spock.lang.Specification
 
@@ -14,6 +18,8 @@ class BaseMessageSenderTest extends Specification {
     Logger mockLogger
     RabbitTemplate mockRabbitTemplate
     String mockExchange
+    RabbitConfiguration mockRabbitConfiguration
+
     def setup() {
         mockExchange = 'mock-exchange'
         baseMessageSender = new BaseMessageSender() {
@@ -26,7 +32,8 @@ class BaseMessageSenderTest extends Specification {
         baseMessageSender.rabbitTemplate = mockRabbitTemplate
         mockLogger = Mock(Logger)
         baseMessageSender.logger = mockLogger
-
+        mockRabbitConfiguration = Mock(RabbitConfiguration)
+        baseMessageSender.rabbitConfiguration = mockRabbitConfiguration
     }
 
     def "send message"() {
@@ -60,5 +67,25 @@ class BaseMessageSenderTest extends Specification {
             error ->
                 assert error[0].startsWith('exception: RuntimeException - Boom!, when sending message:')
         }
+    }
+
+    def "init create exchange and template"() {
+        given:
+        ConnectionFactory mockConnectionFactory = Mock(ConnectionFactory)
+        Connection mockConnection = Mock(Connection)
+        Channel mockChannel = Mock(Channel)
+        GroovyMock(RabbitTemplate, global: true)
+        baseMessageSender.rabbitTemplate = null
+
+        when:
+        baseMessageSender.init()
+
+        then:
+        1 * mockRabbitConfiguration.connectionFactory >> mockConnectionFactory
+        1 * mockConnectionFactory.createConnection() >> mockConnection
+        1 * mockConnection.createChannel(true) >> mockChannel
+        1 * mockChannel.exchangeDeclare(mockExchange, 'fanout', true)
+        1 * new RabbitTemplate(mockConnectionFactory) >> mockRabbitTemplate
+        baseMessageSender.rabbitTemplate == mockRabbitTemplate
     }
 }

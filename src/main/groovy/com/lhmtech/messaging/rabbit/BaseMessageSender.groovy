@@ -1,8 +1,11 @@
 package com.lhmtech.messaging.rabbit
 
+import com.rabbitmq.client.Channel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.core.Message
+import org.springframework.amqp.rabbit.connection.Connection
+import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.SmartLifecycle
@@ -61,8 +64,11 @@ abstract class BaseMessageSender implements SmartLifecycle{
         return 0
     }
 
-    void validateAnnotation(Annotation annotation) {
-
-
+    void init() {
+        ConnectionFactory connectionFactory = rabbitConfiguration.connectionFactory
+        Connection connection = connectionFactory.createConnection()
+        Channel channel = connection.createChannel(true)
+        channel.exchangeDeclare(this.getExchange(), 'fanout', true)
+        rabbitTemplate = new RabbitTemplate(connectionFactory)
     }
 }
