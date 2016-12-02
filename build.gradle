@@ -6,14 +6,17 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        //classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath(group: 'com.lhmtech.build', name: 'ci-plugin', version: '1.0.12')
     }
 }
 
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
-apply plugin: 'spring-boot'
+apply plugin: 'java'
+
+
+//apply plugin: 'spring-boot'
 apply plugin: 'com.lhmtech.build.ciplugin'
 
 version=buildVersionManager.readBuild()
@@ -37,20 +40,12 @@ configurations.all {
 }
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-ws:${springBootVersion}")
-    compile("org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}")
-    compile("org.springframework.boot:spring-boot-actuator-docs:${springBootVersion}")
-    compile("org.springframework.boot:spring-boot-starter-data-mongodb:${springBootVersion}")
-    compile("org.springframework.boot:spring-boot-starter-mail:${springBootVersion}")
     compile("org.springframework.boot:spring-boot-starter-amqp:${springBootVersion}")
-    compile("org.codehaus.groovy:groovy")
-    compile("org.codehaus.groovy.modules.http-builder:http-builder:0.7.1")
     compile("org.codehaus.groovy:groovy-all:2.4.7")
-    compile("org.codehaus.groovy:groovy-xml:2.4.7")
     compile("ch.qos.logback:logback-classic:1.1.7")
-    compile("org.ajoberstar:grgit:1.7.0")
-    compile("com.lhmtech.stockwatch:common:1.0.4")
+    compile("org.apache.httpcomponents:httpcore:4.4")
 
+    testCompile("org.springframework.boot:spring-boot-starter-ws:${springBootVersion}")
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
     testCompile("org.spockframework:spock-core:1.0-groovy-2.4")
     testCompile("org.spockframework:spock-spring:1.0-groovy-2.4")
