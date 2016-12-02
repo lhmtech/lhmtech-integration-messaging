@@ -36,32 +36,33 @@ abstract class BaseMessageSender implements SmartLifecycle{
 
     @Override
     boolean isAutoStartup() {
-        return false
+        return true
     }
 
     @Override
     void stop(Runnable callback) {
-
+        stop()
+        callback.run()
     }
 
     @Override
     void start() {
-
+        init()
     }
 
     @Override
     void stop() {
-
+        rabbitTemplate = null
     }
 
     @Override
     boolean isRunning() {
-        return false
+        return rabbitTemplate != null
     }
 
     @Override
     int getPhase() {
-        return 0
+        return Integer.MAX_VALUE
     }
 
     void init() {

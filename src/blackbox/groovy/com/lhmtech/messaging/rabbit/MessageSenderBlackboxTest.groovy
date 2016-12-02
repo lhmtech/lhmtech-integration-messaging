@@ -21,4 +21,13 @@ class MessageSenderBlackboxTest extends Specification {
         basicMessageSender != null
         basicMessageSender.getExchange() == 'box-exchange'
     }
+
+    def "send message hello"() {
+        when:
+        basicMessageSender.send("hello")
+
+        then:
+        true
+
+    }
 }
