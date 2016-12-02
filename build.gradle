@@ -105,4 +105,4 @@ artifactory {
 }
 
 
-
+apply from: 'tests.gradle'

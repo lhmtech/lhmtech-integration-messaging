@@ -1,0 +1,94 @@
+import com.wiredforcode.gradle.spawn.KillProcessTask
+import com.wiredforcode.gradle.spawn.SpawnProcessTask
+buildscript {
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.wiredforcode:gradle-spawn-plugin:0.8.1"
+    }
+}
+
+//apply plugin: 'com.wiredforcode.spawn'
+
+dependencies {
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.4')
+    testCompile("org.spockframework:spock-spring:1.0-groovy-2.4")
+    testCompile("org.codehaus.groovy.modules.http-builder:http-builder:0.7.1")
+    testCompile("cglib:cglib:3.1")
+}
+
+sourceSets {
+    blackboxSource {
+        groovy { srcDirs = ['src/blackbox/groovy'] }
+        compileClasspath += sourceSets.test.compileClasspath
+        runtimeClasspath += sourceSets.test.runtimeClasspath
+    }
+}
+
+test {
+    testLogging {
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                println "Test result: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} succeeded, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped)"
+            }
+        }
+    }
+}
+
+task runBlackboxTests(type: Test, dependsOn: assemble) {
+    description = 'Run blackbox tests'
+    outputs.upToDateWhen { false }
+    doFirst() {
+        tasks.startDocker.execute()
+//        tasks.startApp.execute()
+    }
+    testClassesDir = sourceSets.blackboxSource.output.classesDir
+    classpath = sourceSets.blackboxSource.runtimeClasspath
+    reports.junitXml.destination = 'build/test-results'
+    reports.html.destination = 'build/reports/blackboxTests'
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            println "Blackbox result: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} succeeded, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped)"
+            tasks.stopDocker.execute()
+//            tasks.stopApp.execute()
+        }
+    }
+
+
+}
+task startDocker << {
+    exec {
+        commandLine 'docker-compose', 'up', '-d'
+    }
+}
+
+task stopDocker << {
+    exec {
+        commandLine 'docker-compose', 'stop'
+    }
+    exec {
+        commandLine 'docker-compose', 'rm', '-f'
+    }
+}
+
+task startApp(type: SpawnProcessTask, dependsOn: assemble) {
+    description = 'Starting application'
+    pidLockFileName = 'application.pid.lock'
+    command 'java -jar -server ' + jar.archivePath
+    ready 'Started Application'
+}
+
+task stopApp(type: KillProcessTask) {
+    description = 'Stopping application'
+    pidLockFileName = 'application.pid.lock'
+}
+
+
+test.finalizedBy(runBlackboxTests)
+
