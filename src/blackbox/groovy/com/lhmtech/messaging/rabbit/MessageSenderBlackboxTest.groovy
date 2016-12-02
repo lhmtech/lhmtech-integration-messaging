@@ -13,12 +13,12 @@ import spock.lang.Specification
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MessageSenderBlackboxTest extends Specification {
     @Autowired
-    @Qualifier('PWJ')
+    @Qualifier('BOX')
     BaseMessageSender basicMessageSender
 
     def "should boot up without errors"() {
         expect:
         basicMessageSender != null
-        basicMessageSender.getExchange() == 'pwj-exchange'
+        basicMessageSender.getExchange() == 'box-exchange'
     }
 }

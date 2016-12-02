@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component
 /**
  * Created by lihe on 16-12-2.
  */
-@Component(value='PWJ')
-class PwjMessageSenderImpl extends com.lhmtech.messaging.rabbit.BaseMessageSender {
-    @Value('${message.pwj.exchange}')
+@Component(value='BOX')
+class BlackboxMessageSenderImpl extends com.lhmtech.messaging.rabbit.BaseMessageSender {
+    @Value('${message.box.exchange}')
     String exchangeName
 
     @Override
