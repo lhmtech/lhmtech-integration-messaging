@@ -26,6 +26,7 @@ dependencies {
 sourceSets {
     blackboxSource {
         groovy { srcDirs = ['src/blackbox/groovy'] }
+        resources.srcDir file('src/blackbox/resources')
         compileClasspath += sourceSets.test.compileClasspath
         runtimeClasspath += sourceSets.test.runtimeClasspath
     }

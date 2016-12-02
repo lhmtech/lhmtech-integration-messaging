@@ -8,17 +8,24 @@ import spock.lang.Specification
 /**
  * Created by lihe on 16-11-30.
  */
-class BasicMessageSenderTest extends Specification {
+class BaseMessageSenderTest extends Specification {
 
-    BasicMessageSender basicMessageSender
+    BaseMessageSender baseMessageSender
     Logger mockLogger
     RabbitTemplate mockRabbitTemplate
+    String mockExchange
     def setup() {
-        basicMessageSender = new BasicMessageSender()
+        mockExchange = 'mock-exchange'
+        baseMessageSender = new BaseMessageSender() {
+            @Override
+            String getExchange() {
+                mockExchange
+            }
+        }
         mockRabbitTemplate = Mock(RabbitTemplate)
-        basicMessageSender.rabbitTemplate = mockRabbitTemplate
+        baseMessageSender.rabbitTemplate = mockRabbitTemplate
         mockLogger = Mock(Logger)
-        basicMessageSender.logger = mockLogger
+        baseMessageSender.logger = mockLogger
 
     }
 
@@ -30,12 +37,11 @@ class BasicMessageSenderTest extends Specification {
         Message mockMessage = GroovyMock(Message, global: true)
 
         when:
-        basicMessageSender.toExchange = to
-        basicMessageSender.send(hello)
+        baseMessageSender.send(hello)
 
         then:
         1 * new Message(hello.bytes, null) >> mockMessage
-        1 * mockRabbitTemplate.convertAndSend(to, null, mockMessage)
+        1 * mockRabbitTemplate.convertAndSend(mockExchange, null, mockMessage)
     }
 
     def "send message will log error whnen exception occurs"() {
@@ -45,8 +51,7 @@ class BasicMessageSenderTest extends Specification {
         Message mockMessage = GroovyMock(Message, global: true)
 
         when:
-        basicMessageSender.toExchange = to
-        basicMessageSender.send(hello)
+        baseMessageSender.send(hello)
 
         then:
         1 * new Message(hello.bytes, null) >> mockMessage
