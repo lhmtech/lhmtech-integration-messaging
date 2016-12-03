@@ -13,10 +13,10 @@ import spock.lang.Specification
 /**
  * Created by lihe on 16-11-30.
  */
-class BaseMessageSenderTest extends Specification {
+class BaseMessagePublisherTest extends Specification {
 
     @Shared
-    MessageSenderTestImpl messageSender
+    MessagePublisherTestImpl messagePublisher
     Logger mockLogger
     RabbitTemplate mockRabbitTemplate
     String mockExchange
@@ -24,13 +24,13 @@ class BaseMessageSenderTest extends Specification {
 
     def setup() {
         mockExchange = 'mock-exchange'
-        messageSender = new MessageSenderTestImpl(exchangeName: mockExchange)
+        messagePublisher = new MessagePublisherTestImpl(exchangeName: mockExchange)
         mockRabbitTemplate = Mock(RabbitTemplate)
-        messageSender.rabbitTemplate = mockRabbitTemplate
+        messagePublisher.rabbitTemplate = mockRabbitTemplate
         mockLogger = Mock(Logger)
-        messageSender.logger = mockLogger
+        messagePublisher.logger = mockLogger
         mockRabbitConfiguration = Mock(RabbitConfiguration)
-        messageSender.rabbitConfiguration = mockRabbitConfiguration
+        messagePublisher.rabbitConfiguration = mockRabbitConfiguration
     }
 
     def "send message"() {
@@ -40,7 +40,7 @@ class BaseMessageSenderTest extends Specification {
         Message mockMessage = GroovyMock(Message, global: true)
 
         when:
-        messageSender.send(hello)
+        messagePublisher.send(hello)
 
         then:
         1 * new Message(hello.bytes, null) >> mockMessage
@@ -53,7 +53,7 @@ class BaseMessageSenderTest extends Specification {
         Message mockMessage = GroovyMock(Message, global: true)
 
         when:
-        messageSender.send(hello)
+        messagePublisher.send(hello)
 
         then:
         1 * new Message(hello.bytes, null) >> mockMessage
@@ -70,10 +70,10 @@ class BaseMessageSenderTest extends Specification {
         Connection mockConnection = Mock(Connection)
         Channel mockChannel = Mock(Channel)
         GroovyMock(RabbitTemplate, global: true)
-        messageSender.rabbitTemplate = null
+        messagePublisher.rabbitTemplate = null
 
         when:
-        messageSender.init()
+        messagePublisher.init()
 
         then:
         1 * mockRabbitConfiguration.connectionFactory >> mockConnectionFactory
@@ -81,12 +81,12 @@ class BaseMessageSenderTest extends Specification {
         1 * mockConnection.createChannel(true) >> mockChannel
         1 * mockChannel.exchangeDeclare(mockExchange, 'fanout', true)
         1 * new RabbitTemplate(mockConnectionFactory) >> mockRabbitTemplate
-        messageSender.rabbitTemplate == mockRabbitTemplate
+        messagePublisher.rabbitTemplate == mockRabbitTemplate
     }
 
     def "is auto startup"() {
         expect:
-        messageSender.isAutoStartup()
+        messagePublisher.isAutoStartup()
 
     }
 
@@ -95,10 +95,10 @@ class BaseMessageSenderTest extends Specification {
         Boolean callbackCalled = false
         def callback = { -> callbackCalled = true }
         Boolean stopCalled = false
-//        MessageSenderTestImpl.metaClass.stop = { stopCalled = true }
+//        MessagePublisherTestImpl.metaClass.stop = { stopCalled = true }
 
         when:
-        messageSender.stop(callback)
+        messagePublisher.stop(callback)
 
         then:
 //        stopCalled
@@ -109,10 +109,10 @@ class BaseMessageSenderTest extends Specification {
     def "start calls init"() {
         given:
         Boolean initCalled = false
-        MessageSenderTestImpl.metaClass.init = { initCalled = true }
+        MessagePublisherTestImpl.metaClass.init = { initCalled = true }
 
         when:
-        messageSender.start()
+        messagePublisher.start()
 
         then:
         initCalled
@@ -120,21 +120,21 @@ class BaseMessageSenderTest extends Specification {
 
     def "stop set rabbitTemplate to null"() {
         given:
-        messageSender.rabbitTemplate = new RabbitTemplate()
+        messagePublisher.rabbitTemplate = new RabbitTemplate()
 
         when:
-        messageSender.stop()
+        messagePublisher.stop()
 
         then:
-        messageSender.rabbitTemplate == null
+        messagePublisher.rabbitTemplate == null
     }
 
     def "is running based on rabbit template"() {
         given:
-        messageSender.rabbitTemplate = givenTemplate
+        messagePublisher.rabbitTemplate = givenTemplate
 
         when:
-        Boolean result = messageSender.isRunning()
+        Boolean result = messagePublisher.isRunning()
 
         then:
         result == expected

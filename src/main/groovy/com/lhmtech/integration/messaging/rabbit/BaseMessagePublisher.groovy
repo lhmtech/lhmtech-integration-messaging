@@ -13,7 +13,7 @@ import org.springframework.context.SmartLifecycle
 /**
  * Created by lihe on 16-11-30.
  */
-abstract class BaseMessageSender implements SmartLifecycle{
+abstract class BaseMessagePublisher implements SmartLifecycle{
     Logger logger = LoggerFactory.getLogger(this.getClass())
     abstract String getExchange()
     RabbitTemplate rabbitTemplate

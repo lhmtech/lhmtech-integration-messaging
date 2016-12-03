@@ -3,7 +3,7 @@ package com.lhmtech.integration.messaging.rabbit
 /**
  * Created by lihe on 16-12-2.
  */
-class MessageSenderTestImpl extends BaseMessageSender{
+class MessagePublisherTestImpl extends BaseMessagePublisher{
     String exchangeName
     @Override
     String getExchange() {
