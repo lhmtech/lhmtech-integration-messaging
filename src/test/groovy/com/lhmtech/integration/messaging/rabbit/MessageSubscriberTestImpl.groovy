@@ -8,4 +8,14 @@ class MessageSubscriberTestImpl extends BaseMessageSubscriber {
     void subscribe(byte[] messageBytes) {
 
     }
+
+    @Override
+    String getExchange() {
+        return null
+    }
+
+    @Override
+    String getQueue() {
+        return null
+    }
 }

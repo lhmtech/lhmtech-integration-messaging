@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component
 /**
  * Created by lihe on 16-12-2.
  */
-@Component(value='BOX')
+@Component(value='BLACKBOX_PUBLISHER')
 class BlackboxMessagePublisherImpl extends BaseMessagePublisher {
-    @Value('${message.box.exchange}')
+    @Value('${message.publisher.exchange}')
     String exchangeName
 
     @Override

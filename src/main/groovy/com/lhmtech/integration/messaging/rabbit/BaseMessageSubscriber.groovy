@@ -21,6 +21,9 @@ abstract class BaseMessageSubscriber implements SmartLifecycle{
     static final String LHM_DEAD_LETTER_ROUTING_KEY='dead-letter-routing-key'
 
     abstract void subscribe(byte[] messageBytes)
+    abstract String getExchange()
+    abstract String getQueue()
+
     @Autowired
     RabbitConfiguration rabbitConfiguration
 

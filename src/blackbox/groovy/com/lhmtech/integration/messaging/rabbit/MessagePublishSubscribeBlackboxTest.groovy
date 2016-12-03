@@ -11,20 +11,28 @@ import spock.lang.Specification
  */
 @ContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class MessageSenderBlackboxTest extends Specification {
+class MessagePublishSubscribeBlackboxTest extends Specification {
     @Autowired
-    @Qualifier('BOX')
-    BaseMessagePublisher basicMessageSender
+    @Qualifier('BLACKBOX_PUBLISHER')
+    BaseMessagePublisher messagePublisher
+
+    @Autowired
+    @Qualifier('BLACKBOX_SUBSCRIBER')
+    BaseMessageSubscriber messageSubscriber
 
     def "should boot up without errors"() {
         expect:
-        basicMessageSender != null
-        basicMessageSender.getExchange() == 'box-exchange'
+        messagePublisher != null
+        messagePublisher.getExchange() == 'box-exchange'
+
+        messageSubscriber != null
+        messageSubscriber.getExchange() == 'box-exchange'
+        messageSubscriber.getQueue() == 'box-queue'
     }
 
     def "publish message hello"() {
         when:
-        basicMessageSender.publish("hello")
+        messagePublisher.publish("hello")
 
         then:
         true
