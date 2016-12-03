@@ -2,11 +2,15 @@ package com.lhmtech.integration.messaging.rabbit
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.amqp.core.AcknowledgeMode
 import org.springframework.amqp.core.BindingBuilder
 import org.springframework.amqp.core.DirectExchange
+import org.springframework.amqp.core.FanoutExchange
 import org.springframework.amqp.core.Queue
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
+import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener
 import org.springframework.amqp.rabbit.core.RabbitAdmin
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.SmartLifecycle
 
@@ -76,5 +80,23 @@ abstract class BaseMessageSubscriber implements SmartLifecycle{
                 .bind(dealLetterQueue)
                 .to(deadLetterExchange)
                 .with(LHM_DEAD_LETTER_ROUTING_KEY))
+    }
+
+    void createWorkingExchangeAndQueue() {
+        Map<String, Object> args = ["x-dead-letter-exchange": LHM_DEAD_LETTER_EXCHANGE,
+                                    "x-dead-letter-routing-key": LHM_DEAD_LETTER_ROUTING_KEY]
+        Queue workingQueue = new Queue(this.getQueue(), true, false, false, args)
+        FanoutExchange workingExchange = new FanoutExchange(this.getExchange())
+        RabbitAdmin rabbitAdmin = new RabbitAdmin(rabbitConfiguration.connectionFactory)
+        rabbitAdmin.declareExchange(workingExchange)
+        rabbitAdmin.declareQueue(queue)
+        rabbitAdmin.declareBinding(BindingBuilder.bind(queue).to(workingExchange))
+        SimpleMessageListenerContainer listenerContainer = new SimpleMessageListenerContainer(rabbitConfiguration.connectionFactory)
+        listenerContainer.set.setMessageListener(here)
+        listenerContainer.setQueueNames(this.getQueue())
+        listenerContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL)
+        listenerContainer.start()
+        listnerApdapter.container = listenerContainer
+
     }
 }
