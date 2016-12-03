@@ -22,12 +22,12 @@ abstract class BaseMessagePublisher implements SmartLifecycle{
     RabbitConfiguration rabbitConfiguration
 //    ConnectionFactory connectionFactory
 
-    void send(String text) {
+    void publish(String text) {
         try{
         Message message = new Message(text.bytes, null)
         rabbitTemplate.convertAndSend(this.getExchange(), null, message)
         }catch(exception) {
-            logger.error("exception: ${exception.class.simpleName} - ${exception.message}, when sending message: ${text}")
+            logger.error("exception: ${exception.class.simpleName} - ${exception.message}, when publish message: ${text}")
         }
     }
 

@@ -14,7 +14,7 @@ import spock.lang.Specification
 class MessageSenderBlackboxTest extends Specification {
     @Autowired
     @Qualifier('BOX')
-    BaseMessageSender basicMessageSender
+    BaseMessagePublisher basicMessageSender
 
     def "should boot up without errors"() {
         expect:
@@ -22,9 +22,9 @@ class MessageSenderBlackboxTest extends Specification {
         basicMessageSender.getExchange() == 'box-exchange'
     }
 
-    def "send message hello"() {
+    def "publish message hello"() {
         when:
-        basicMessageSender.send("hello")
+        basicMessageSender.publish("hello")
 
         then:
         true

@@ -33,34 +33,34 @@ class BaseMessagePublisherTest extends Specification {
         messagePublisher.rabbitConfiguration = mockRabbitConfiguration
     }
 
-    def "send message"() {
+    def "publish message"() {
         given:
 
         String hello = 'Hello, World'
         Message mockMessage = GroovyMock(Message, global: true)
 
         when:
-        messagePublisher.send(hello)
+        messagePublisher.publish(hello)
 
         then:
         1 * new Message(hello.bytes, null) >> mockMessage
         1 * mockRabbitTemplate.convertAndSend(mockExchange, null, mockMessage)
     }
 
-    def "send message will log error whnen exception occurs"() {
+    def "publish message will log error whnen exception occurs"() {
         given:
         String hello = 'Hello, World'
         Message mockMessage = GroovyMock(Message, global: true)
 
         when:
-        messagePublisher.send(hello)
+        messagePublisher.publish(hello)
 
         then:
         1 * new Message(hello.bytes, null) >> mockMessage
         1 * mockRabbitTemplate.convertAndSend(*_) >> { throw new RuntimeException("Boom!") }
         1 * mockLogger.error(_) >> {
             error ->
-                assert error[0].startsWith('exception: RuntimeException - Boom!, when sending message:')
+                assert error[0].startsWith('exception: RuntimeException - Boom!, when publish message:')
         }
     }
 

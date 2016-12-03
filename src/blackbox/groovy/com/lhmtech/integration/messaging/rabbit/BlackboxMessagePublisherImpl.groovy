@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
  * Created by lihe on 16-12-2.
  */
 @Component(value='BOX')
-class BlackboxMessageSenderImpl extends BaseMessageSender {
+class BlackboxMessagePublisherImpl extends BaseMessagePublisher {
     @Value('${message.box.exchange}')
     String exchangeName
 
