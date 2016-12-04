@@ -16,7 +16,8 @@ class BlackboxMessageSubscriberImpl extends BaseMessageSubscriber {
 
     @Override
     void subscribe(byte[] messageBytes) {
-
+        String message = new String(messageBytes)
+        println('recv message ...')
     }
 
     @Override

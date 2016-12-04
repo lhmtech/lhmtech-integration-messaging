@@ -1,11 +1,13 @@
 package com.lhmtech.integration.messaging.rabbit
 
+import com.rabbitmq.client.Channel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.core.AcknowledgeMode
 import org.springframework.amqp.core.BindingBuilder
 import org.springframework.amqp.core.DirectExchange
 import org.springframework.amqp.core.FanoutExchange
+import org.springframework.amqp.core.Message
 import org.springframework.amqp.core.Queue
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener
@@ -28,6 +30,8 @@ abstract class BaseMessageSubscriber implements SmartLifecycle{
     abstract String getExchange()
     abstract String getQueue()
 
+    ChannelAwareMessageListener listener
+    SimpleMessageListenerContainer container
     @Autowired
     RabbitConfiguration rabbitConfiguration
 
@@ -35,32 +39,39 @@ abstract class BaseMessageSubscriber implements SmartLifecycle{
 
     @Override
     boolean isAutoStartup() {
-        return false
+        return true
     }
 
     @Override
     void stop(Runnable callback) {
-
+        stop()
+        callback.run()
     }
 
     @Override
     void start() {
-
+        createDeadLetterExchangeAndQueue()
+        createWorkingExchangeAndQueue()
     }
 
     @Override
     void stop() {
-
+        try {
+            container.shutdown()
+        } catch (exception) {
+        }
     }
 
     @Override
     boolean isRunning() {
-        return false
+        if (container != null) {
+            return container.isActive()
+        }
     }
 
     @Override
     int getPhase() {
-        return 0
+        Integer.MAX_VALUE
     }
 
     void createDeadLetterExchangeAndQueue() {
@@ -89,14 +100,18 @@ abstract class BaseMessageSubscriber implements SmartLifecycle{
         FanoutExchange workingExchange = new FanoutExchange(this.getExchange())
         RabbitAdmin rabbitAdmin = new RabbitAdmin(rabbitConfiguration.connectionFactory)
         rabbitAdmin.declareExchange(workingExchange)
-        rabbitAdmin.declareQueue(queue)
-        rabbitAdmin.declareBinding(BindingBuilder.bind(queue).to(workingExchange))
-        SimpleMessageListenerContainer listenerContainer = new SimpleMessageListenerContainer(rabbitConfiguration.connectionFactory)
-        listenerContainer.set.setMessageListener(here)
-        listenerContainer.setQueueNames(this.getQueue())
-        listenerContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL)
-        listenerContainer.start()
-        listnerApdapter.container = listenerContainer
-
+        rabbitAdmin.declareQueue(workingQueue)
+        rabbitAdmin.declareBinding(BindingBuilder.bind(workingQueue).to(workingExchange))
+        container = new SimpleMessageListenerContainer(rabbitConfiguration.connectionFactory)
+        listener = new ChannelAwareMessageListener() {
+            @Override
+            void onMessage(Message message, Channel channel) throws Exception {
+                subscribe(message.body)
+            }
+        }
+        container.setMessageListener(listener)
+        container.setQueueNames(this.getQueue())
+        container.setAcknowledgeMode(AcknowledgeMode.MANUAL)
+        container.start()
     }
 }
