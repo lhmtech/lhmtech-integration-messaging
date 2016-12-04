@@ -3,6 +3,7 @@ package com.lhmtech.integration.messaging.rabbit
 import com.rabbitmq.client.Channel
 import org.slf4j.Logger
 import org.springframework.amqp.core.Message
+import org.springframework.amqp.core.MessageProperties
 import org.springframework.amqp.rabbit.connection.Connection
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
@@ -19,12 +20,10 @@ class BaseMessagePublisherTest extends Specification {
     MessagePublisherTestImpl messagePublisher
     Logger mockLogger
     RabbitTemplate mockRabbitTemplate
-    String mockExchange
     RabbitConfiguration mockRabbitConfiguration
 
     def setup() {
-        mockExchange = 'mock-exchange'
-        messagePublisher = new MessagePublisherTestImpl(exchangeName: mockExchange)
+        messagePublisher = new MessagePublisherTestImpl()
         mockRabbitTemplate = Mock(RabbitTemplate)
         messagePublisher.rabbitTemplate = mockRabbitTemplate
         mockLogger = Mock(Logger)
@@ -43,8 +42,8 @@ class BaseMessagePublisherTest extends Specification {
         messagePublisher.publish(hello)
 
         then:
-        1 * new Message(hello.bytes, null) >> mockMessage
-        1 * mockRabbitTemplate.convertAndSend(mockExchange, null, mockMessage)
+        1 * new Message(hello.bytes, new MessageProperties()) >> mockMessage
+        1 * mockRabbitTemplate.convertAndSend('test-publisher-exchange', null, mockMessage)
     }
 
     def "publish message will log error whnen exception occurs"() {
@@ -56,7 +55,7 @@ class BaseMessagePublisherTest extends Specification {
         messagePublisher.publish(hello)
 
         then:
-        1 * new Message(hello.bytes, null) >> mockMessage
+        1 * new Message(hello.bytes, new MessageProperties()) >> mockMessage
         1 * mockRabbitTemplate.convertAndSend(*_) >> { throw new RuntimeException("Boom!") }
         1 * mockLogger.error(_) >> {
             error ->
@@ -79,7 +78,7 @@ class BaseMessagePublisherTest extends Specification {
         1 * mockRabbitConfiguration.connectionFactory >> mockConnectionFactory
         1 * mockConnectionFactory.createConnection() >> mockConnection
         1 * mockConnection.createChannel(true) >> mockChannel
-        1 * mockChannel.exchangeDeclare(mockExchange, 'fanout', true)
+        1 * mockChannel.exchangeDeclare('test-publisher-exchange', 'fanout', true)
         1 * new RabbitTemplate(mockConnectionFactory) >> mockRabbitTemplate
         messagePublisher.rabbitTemplate == mockRabbitTemplate
     }

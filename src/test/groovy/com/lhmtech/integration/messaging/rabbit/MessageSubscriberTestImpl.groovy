@@ -11,11 +11,11 @@ class MessageSubscriberTestImpl extends BaseMessageSubscriber {
 
     @Override
     String getExchange() {
-        return null
+        return 'test-subscriber-exchange'
     }
 
     @Override
     String getQueue() {
-        return null
+        return 'test-subscriber-queue'
     }
 }
