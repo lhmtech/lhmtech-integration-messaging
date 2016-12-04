@@ -4,6 +4,7 @@ import com.rabbitmq.client.Channel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.core.Message
+import org.springframework.amqp.core.MessageProperties
 import org.springframework.amqp.rabbit.connection.Connection
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
@@ -24,7 +25,7 @@ abstract class BaseMessagePublisher implements SmartLifecycle{
 
     void publish(String text) {
         try{
-        Message message = new Message(text.bytes, null)
+        Message message = new Message(text.bytes, new MessageProperties())
         rabbitTemplate.convertAndSend(this.getExchange(), null, message)
         }catch(exception) {
             logger.error("exception: ${exception.class.simpleName} - ${exception.message}, when publish message: ${text}")

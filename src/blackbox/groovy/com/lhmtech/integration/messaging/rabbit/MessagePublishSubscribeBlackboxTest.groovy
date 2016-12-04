@@ -33,7 +33,7 @@ class MessagePublishSubscribeBlackboxTest extends Specification {
     def "publish message hello"() {
         when:
         messagePublisher.publish("hello")
-        sleep(10000)
+        sleep(2000)
 
         then:
         true

@@ -15,9 +15,8 @@ class BlackboxMessageSubscriberImpl extends BaseMessageSubscriber {
     String queueName
 
     @Override
-    void subscribe(byte[] messageBytes) {
-        String message = new String(messageBytes)
-        println('recv message ...')
+    void subscribe(String messageText) {
+        println("recv message ...${messageText}")
     }
 
     @Override

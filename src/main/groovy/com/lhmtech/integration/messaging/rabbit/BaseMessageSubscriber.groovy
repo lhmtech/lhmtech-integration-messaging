@@ -9,7 +9,6 @@ import org.springframework.amqp.core.DirectExchange
 import org.springframework.amqp.core.FanoutExchange
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.core.Queue
-import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener
 import org.springframework.amqp.rabbit.core.RabbitAdmin
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer
@@ -26,7 +25,7 @@ abstract class BaseMessageSubscriber implements SmartLifecycle{
     static final String LHM_DEAD_LETTER_QUEUE='dead-letter-queue'
     static final String LHM_DEAD_LETTER_ROUTING_KEY='dead-letter-routing-key'
 
-    abstract void subscribe(byte[] messageBytes)
+    abstract void subscribe(String messageText)
     abstract String getExchange()
     abstract String getQueue()
 
@@ -106,7 +105,8 @@ abstract class BaseMessageSubscriber implements SmartLifecycle{
         listener = new ChannelAwareMessageListener() {
             @Override
             void onMessage(Message message, Channel channel) throws Exception {
-                subscribe(message.body)
+                String messageText = new String(message.body)
+                subscribe(messageText)
             }
         }
         container.setMessageListener(listener)

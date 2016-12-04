@@ -5,7 +5,7 @@ package com.lhmtech.integration.messaging.rabbit
  */
 class MessageSubscriberTestImpl extends BaseMessageSubscriber {
     @Override
-    void subscribe(byte[] messageBytes) {
+    void subscribe(String messageText) {
 
     }
 
