@@ -12,18 +12,24 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener
 import org.springframework.amqp.rabbit.core.RabbitAdmin
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer
+import spock.lang.Ignore
 import spock.lang.Specification
+import spock.lang.Unroll
 
 /**
  * Created by lihe on 16-12-2.
  */
 class BaseMessageSubscriberTest extends Specification {
+    RabbitConfiguration mockRabbitConfiguration
+    ConnectionFactory mockConnectionFactory
 
+    def setup() {
+        mockRabbitConfiguration = Mock(RabbitConfiguration)
+        mockConnectionFactory = Mock(ConnectionFactory)
+    }
     //create_dead_letter
     def "create dead letter exchange and queue"() {
         given:
-        RabbitConfiguration mockRabbitConfiguration = Mock(RabbitConfiguration)
-        ConnectionFactory mockConnectionFactory = Mock(ConnectionFactory)
         Queue mockQueue = GroovyMock(Queue, global: true)
         DirectExchange mockDirectExchange = GroovyMock(DirectExchange, global: true)
         RabbitAdmin mockRabbitAdmin=GroovyMock(RabbitAdmin, global: true)
@@ -54,13 +60,14 @@ class BaseMessageSubscriberTest extends Specification {
         given:
         Queue mockWorkingQueue = GroovyMock(Queue, global: true)
         MessageSubscriberTestImpl messageSubscriber = new MessageSubscriberTestImpl()
+        messageSubscriber.rabbitConfiguration = mockRabbitConfiguration
         FanoutExchange mockWorkingExchange = GroovyMock(FanoutExchange, global: true)
-        RabbitConfiguration mockRabbitConfiguration = Mock(RabbitConfiguration)
-        ConnectionFactory mockConnectionFactory = Mock(ConnectionFactory)
         RabbitAdmin mockRabbitAdmin=GroovyMock(RabbitAdmin, global: true)
         GroovyMock(BindingBuilder, global: true)
         BindingBuilder.DestinationConfigurer mockDestinationConfigurer = GroovyMock(BindingBuilder.DestinationConfigurer)
         Binding mockBinding = Mock(Binding)
+        SimpleMessageListenerContainer mockContainer = GroovyMock(SimpleMessageListenerContainer, global: true)
+        ChannelAwareMessageListener mockListener = Mock(ChannelAwareMessageListener)
 
         when:
         messageSubscriber.createWorkingExchangeAndQueue()
@@ -74,26 +81,99 @@ class BaseMessageSubscriberTest extends Specification {
         1 * mockRabbitConfiguration.connectionFactory >> mockConnectionFactory
         1 * new RabbitAdmin(mockConnectionFactory) >> mockRabbitAdmin
         1 * mockRabbitAdmin.declareExchange(mockWorkingExchange)
-
+        1 * mockRabbitAdmin.declareQueue(mockWorkingQueue)
         1 * BindingBuilder.bind(mockWorkingQueue) >> mockDestinationConfigurer
         1 * mockDestinationConfigurer.to(mockWorkingExchange) >> mockBinding
         1 * mockRabbitAdmin.declareBinding(mockBinding)
-        /*M
-        rabbitAdmin.declareQueue(workingQueue)
-        rabbitAdmin.declareBinding(BindingBuilder.bind(workingQueue).to(workingExchange))
-        container = new SimpleMessageListenerContainer(rabbitConfiguration.connectionFactory)
-        listener = new ChannelAwareMessageListener() {
-            @Override
-            void onMessage(Message message, Channel channel) throws Exception {
-                String messageText = new String(message.body)
-                subscribe(messageText)
-            }
-        }
-        container.setMessageListener(listener)
-        container.setQueueNames(this.getQueue())
-        container.setAcknowledgeMode(AcknowledgeMode.MANUAL)
-        container.start()*/
-        true
+        1 * new SimpleMessageListenerContainer(mockConnectionFactory) >> mockContainer
+        //1 * new ChannelAwareMessageListener() >> mockListener
+        1 * mockContainer.setMessageListener(_)
+        1 * mockContainer.setQueueNames('test-subscriber-queue')
+        1 * mockContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL)
+        1 * mockContainer.start()
     }
-    //crea
+
+    def "is auto startup"() {
+        expect:
+        new MessageSubscriberTestImpl().isAutoStartup()
+    }
+
+    def "stop with callback call stop then callback"() {
+        given:
+        Boolean callbackCalled = false
+        def callback = { -> callbackCalled = true }
+        Boolean stopCalled = false
+        MessageSubscriberTestImpl messageSubscriber = new MessageSubscriberTestImpl()
+        messageSubscriber.metaClass.stop = { stopCalled = true }
+
+        when:
+        messageSubscriber.stop(callback)
+
+        then:
+        //stopCalled
+        callbackCalled
+    }
+
+    @Ignore
+    def "start create dead letter and working queue"() {
+        given:
+        boolean createDLXQ = false
+        boolean createWorkingXQ = false
+        MessageSubscriberTestImpl messageSubscriber = new MessageSubscriberTestImpl()
+        messageSubscriber.metaClass.createDeadLetterExchangeAndQueue = { createDLXQ = true }
+        messageSubscriber.metaClass.createWorkingExchangeAndQueue = { createWorkingXQ = true }
+
+        when:
+        messageSubscriber.start()
+
+        then:
+        createDLXQ
+        createWorkingXQ
+    }
+
+    def "stop shutdown container"() {
+        given:
+        SimpleMessageListenerContainer mockContainer = Mock(SimpleMessageListenerContainer)
+        MessageSubscriberTestImpl messageSubscriber = new MessageSubscriberTestImpl()
+        messageSubscriber.container = mockContainer
+
+        when:
+        messageSubscriber.stop()
+
+        then:
+        1* mockContainer.shutdown()
+    }
+
+    def "is running return false when container is null"() {
+        given:
+        MessageSubscriberTestImpl messageSubscriber = new MessageSubscriberTestImpl()
+        messageSubscriber.container = null
+
+        when:
+        boolean running = messageSubscriber.isRunning()
+
+        then:
+        !running
+    }
+
+    @Ignore
+    @Unroll
+    def "is running return container is active"() {
+        given:
+        SimpleMessageListenerContainer mockContainer = Mock(SimpleMessageListenerContainer)
+        MessageSubscriberTestImpl messageSubscriber = new MessageSubscriberTestImpl()
+        messageSubscriber.container = mockContainer
+        mockContainer.isActive() >> expected
+
+        when:
+        boolean running = messageSubscriber.isRunning()
+
+        then:
+
+        running == expected
+
+        where:
+        expected << [true, false]
+    }
+
 }

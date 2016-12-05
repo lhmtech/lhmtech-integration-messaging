@@ -20,7 +20,7 @@ class MessagePublishSubscribeBlackboxTest extends Specification {
     @Qualifier('BLACKBOX_SUBSCRIBER')
     BaseMessageSubscriber messageSubscriber
 
-    def "should boot up without errors"() {
+    def "creates publisher and subscriber"() {
         expect:
         messagePublisher != null
         messagePublisher.getExchange() == 'box-exchange'
