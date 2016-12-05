@@ -21,7 +21,7 @@ apply plugin: 'com.lhmtech.build.ciplugin'
 
 version=buildVersionManager.readBuild()
 
-ext { appName = 'messaging'}
+ext { appName = 'integration-messaging'}
 group 'com.lhmtech.integration'
 jar {
     baseName = "$appName"
