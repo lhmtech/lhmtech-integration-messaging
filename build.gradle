@@ -1,0 +1,102 @@
+buildscript {
+    ext {
+        springBootVersion = '1.4.1.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        //classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath(group: 'com.lhmtech.build', name: 'ci-plugin', version: '1.0.12')
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+apply plugin: 'java'
+
+
+//apply plugin: 'spring-boot'
+apply plugin: 'com.lhmtech.build.ciplugin'
+
+version=buildVersionManager.readBuild()
+
+ext { appName = 'messaging'}
+group 'com.lhmtech.integration'
+jar {
+    baseName = "$appName"
+    libsDirName = "libs/com/lhmtech/integration/${appName}/${version}"
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+//1. exclude commons-logging
+configurations.all {
+    exclude group: "commons-logging", module: "commons-logging"
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-amqp:${springBootVersion}")
+    compile("org.codehaus.groovy:groovy-all:2.4.7")
+    compile("ch.qos.logback:logback-classic:1.1.7")
+    compile("org.apache.httpcomponents:httpcore:4.4")
+
+    testCompile("org.springframework.boot:spring-boot-starter-ws:${springBootVersion}")
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testCompile("org.spockframework:spock-core:1.0-groovy-2.4")
+    testCompile("org.spockframework:spock-spring:1.0-groovy-2.4")
+}
+
+
+eclipse {
+    classpath {
+        containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+        containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.9'
+}
+
+
+buildscript {
+    repositories {
+        maven {
+            url "${artifactory_contextUrl}/plugins-release"
+        }
+
+    }
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+    }
+}
+
+allprojects {
+    apply plugin: "com.jfrog.artifactory"
+}
+
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            repoKey = 'libs-release-local'
+            maven = true
+
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'libs-release'
+            maven = true
+
+        }
+    }
+}
+
+apply from: 'tests.gradle'
