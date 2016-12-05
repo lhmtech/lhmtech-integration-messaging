@@ -36,7 +36,6 @@ class MessagePublishSubscribeBlackboxTest extends Specification {
         sleep(2000)
 
         then:
-        true
-
+        messageSubscriber.lastMessage == 'hello'
     }
 }

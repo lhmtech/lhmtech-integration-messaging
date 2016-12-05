@@ -14,8 +14,11 @@ class BlackboxMessageSubscriberImpl extends BaseMessageSubscriber {
     @Value('${message.subscriber.queue}')
     String queueName
 
+    String lastMessage
+
     @Override
     void subscribe(String messageText) {
+        lastMessage = messageText
         println("recv message ...${messageText}")
     }
 
@@ -28,4 +31,5 @@ class BlackboxMessageSubscriberImpl extends BaseMessageSubscriber {
     String getQueue() {
         queueName
     }
+
 }
