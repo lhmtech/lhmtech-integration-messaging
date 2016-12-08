@@ -109,6 +109,7 @@ abstract class BaseMessageSubscriber implements SmartLifecycle{
             void onMessage(Message message, Channel channel) throws Exception {
                 String messageText = new String(message.body)
                 subscribe(messageText)
+                channel.basicAck(message.messageProperties.deliveryTag, false)
             }
         }
         container.setMessageListener(listener)
