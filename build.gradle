@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.4.1.RELEASE'
+        springBootVersion = '1.5.2.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -8,7 +8,7 @@ buildscript {
     }
     dependencies {
         //classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath(group: 'com.lhmtech.ci', name: 'ci-plugin', version: '1.0.12')
+        classpath(group: 'com.lhmtech.ci', name: 'ci-plugin', version: '1.0.15')
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1+"
     }
 }
@@ -50,7 +50,7 @@ dependencies {
     compile("ch.qos.logback:logback-classic:1.1.7")
     compile("org.apache.httpcomponents:httpcore:4.4")
 
-    testCompile("org.springframework.boot:spring-boot-starter-ws:${springBootVersion}")
+    testCompile("org.springframework.boot:spring-boot-starter-web-services:${springBootVersion}")
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
     testCompile("org.spockframework:spock-core:1.0-groovy-2.4")
     testCompile("org.spockframework:spock-spring:1.0-groovy-2.4")
